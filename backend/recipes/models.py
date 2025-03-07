@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 
-User = get_user_model()
+#User = get_user_model()
+from users.models import CustomUser
 
 
 class Tag(models.Model):
@@ -29,7 +30,7 @@ class Recipe(models.Model):
     short_link = models.SlugField()
 
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Автор'
     )
@@ -83,10 +84,10 @@ class Favorites(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
-    author = models.ForeignKey(
-        User,
+    list_owner = models.ForeignKey(
+        CustomUser,
         on_delete=models.CASCADE,
-        verbose_name='Автор'
+        verbose_name='Владелец списка избранного'
     )
 
 
@@ -96,8 +97,8 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
-    author = models.ForeignKey(
-        User,
+    cart_owner = models.ForeignKey(
+        CustomUser,
         on_delete=models.CASCADE,
-        verbose_name='Автор'
+        verbose_name='Владелец списка покупок'
     )
