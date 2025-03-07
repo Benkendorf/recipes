@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Follow
+from .models import Subscription
 
 User = get_user_model()
 
@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
     def get_is_subscribed(self, obj):
-        return Follow.objects.get(
-            follower=self.context['request'].user,
-            follows=obj
+        return Subscription.objects.get(
+            subscriber=self.context['request'].user,
+            subscribed_to=obj
         ).exists()

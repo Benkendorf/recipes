@@ -19,15 +19,15 @@ class CustomUser(AbstractUser):
     )
 
 
-class Follow(models.Model):
-    follower = models.ForeignKey(
+class Subscription(models.Model):
+    subscriber = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Подписчик',
         related_name='followers'
     )
 
-    follows = models.ForeignKey(
+    subscribed_to = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Подписан на',
