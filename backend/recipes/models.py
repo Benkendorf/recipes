@@ -27,7 +27,7 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipes')
     text = models.TextField()
     cooking_time = models.IntegerField()
-    short_link = models.SlugField()
+    #short_link = models.SlugField()
 
     author = models.ForeignKey(
         CustomUser,

@@ -5,18 +5,19 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    # Переопределяем поля без blank=True.
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
 
-    avatar = models.ImageField(upload_to='avatars', blank=True)
+    avatar = models.ImageField(upload_to='avatars', blank=True, null=True)
 
     followings = models.ManyToManyField(
         'CustomUser',
-        through='Follow',
+        through='Subscription',
         verbose_name='Подписки'
     )
+
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
 
 class Subscription(models.Model):
