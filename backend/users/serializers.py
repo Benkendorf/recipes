@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
     def get_is_subscribed(self, obj):
-        return Subscription.objects.get(
+        return Subscription.objects.filter(
             subscriber=self.context['request'].user,
             subscribed_to=obj
         ).exists()

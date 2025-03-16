@@ -3,12 +3,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 
 from .models import Ingredient, Recipe, Tag
-from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
+from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
 
 
 class TagViewset(viewsets.ModelViewSet):
     queryset = Tag.objects.all().order_by('name')
     serializer_class = TagSerializer
+
+    pagination_class = None
 
 
 class IngredientViewset(viewsets.ModelViewSet):
@@ -23,4 +25,13 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('name')
-    serializer_class = RecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user
+        )
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update'):
+            return RecipeCreateSerializer
+        return RecipeSerializer

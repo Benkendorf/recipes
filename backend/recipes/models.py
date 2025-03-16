@@ -63,6 +63,9 @@ class RecipeTag(models.Model):
         verbose_name='Тэг'
     )
 
+    class Meta:
+        unique_together = ('recipe', 'tag')
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
@@ -76,6 +79,9 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.IntegerField()
+
+    class Meta:
+        unique_together = ('recipe', 'ingredient')
 
 
 class Favorites(models.Model):
