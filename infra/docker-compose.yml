@@ -2,6 +2,7 @@ version: '3.3'
 volumes:
   static:
   pg_data:
+  media:
 services:
   db:
     container_name: foodgram-db
@@ -18,6 +19,7 @@ services:
       - db
     volumes:
       - static:/backend_static
+      - media:/app/media
 
   frontend:
     container_name: foodgram-front
@@ -39,3 +41,4 @@ services:
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/staticfiles/
+      - media:/media
