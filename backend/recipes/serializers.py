@@ -22,11 +22,22 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
 
 
-class RecipeIngredientSerializer(serializers.ModelSerializer):
+class RecipeIngredientSerializer(serializers. ModelSerializer):
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.CharField(source='ingredient.name')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit')
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
+        queryset=Ingredient.objects.all(),
+        source='ingredient'
     )
-    amount = serializers.IntegerField()
 
     class Meta:
         model = RecipeIngredient
@@ -36,7 +47,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer()
     tags = TagSerializer(many=True)
-    ingredients = IngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(many=True, source='recipe_ingredients')
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -66,10 +77,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all()
     )
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientCreateSerializer(many=True)
     image = Base64ImageField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         fields = '__all__'
@@ -100,7 +109,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         for ingredient_data in ingredients_data:
             logging.critical(f'CURRENT INGREDIENT_DATA: {ingredient_data}')
-            ingredient = ingredient_data['id']
+            ingredient = ingredient_data['ingredient']
             logging.critical(f'CURRENT INGREDIENT: {ingredient}')
             amount = ingredient_data['amount']
             logging.critical(f'CURRENT AMOUNT: {amount}')
@@ -113,13 +122,5 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         return recipe
 
-    """
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if self.context['request'].method == 'GET':
-            ingredients = representation.get('ingredients', [])
-            for ingredient in ingredients:
-                ingredient['amount'] = RecipeIngredient.objects.get(
-                    recipe=instance, ingredient=ingredient['id']).amount
-        return representation
-    """
+        return RecipeSerializer(instance, context=self.context).data

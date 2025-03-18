@@ -44,6 +44,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
+        #through_fields=('recipe', 'ingredient'),
         verbose_name='Ингредиенты'
     )
 
@@ -71,14 +72,16 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
+        related_name='recipe_ingredients',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингредиент'
+        verbose_name='Ингредиент',
+        related_name='recipe_ingredients',
     )
-    amount = models.IntegerField()
+    amount = models.PositiveIntegerField()
 
     class Meta:
         unique_together = ('recipe', 'ingredient')
