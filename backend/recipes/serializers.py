@@ -105,22 +105,53 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for tag in tags:
             RecipeTag.objects.create(tag=tag, recipe=recipe)
 
-        logging.critical(f'INGREDIENTS_DATA: {ingredients_data}')
-
         for ingredient_data in ingredients_data:
-            logging.critical(f'CURRENT INGREDIENT_DATA: {ingredient_data}')
             ingredient = ingredient_data['ingredient']
-            logging.critical(f'CURRENT INGREDIENT: {ingredient}')
             amount = ingredient_data['amount']
-            logging.critical(f'CURRENT AMOUNT: {amount}')
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient,
                 amount=amount
             )
-            logging.critical('RECIPE_INGREDIENT_CREATE DONE')
 
         return recipe
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
+        instance.image = validated_data.get('image', instance.image)
+
+        tags = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
+
+        current_tags = RecipeTag.objects.filter(
+            recipe=instance
+        )
+        for tag in current_tags:
+            tag.delete()
+
+        current_ingredients = RecipeIngredient.objects.filter(
+            recipe=instance
+        )
+        for ingredient in current_ingredients:
+            ingredient.delete()
+
+        for tag in tags:
+            RecipeTag.objects.create(tag=tag, recipe=instance)
+
+        for ingredient_data in ingredients_data:
+            ingredient = ingredient_data['ingredient']
+            amount = ingredient_data['amount']
+            RecipeIngredient.objects.create(
+                recipe=instance,
+                ingredient=ingredient,
+                amount=amount
+            )
+
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return RecipeSerializer(instance, context=self.context).data

@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import Ingredient, Recipe, Tag
 from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
@@ -25,6 +26,7 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('name')
+    permission_classes = [IsAuthenticatedOrReadOnly,]
 
     def perform_create(self, serializer):
         serializer.save(
@@ -32,6 +34,6 @@ class RecipeViewset(viewsets.ModelViewSet):
         )
 
     def get_serializer_class(self):
-        if self.action in ('create', 'update'):
+        if self.action in ('create', 'partial_update'):
             return RecipeCreateSerializer
         return RecipeSerializer
