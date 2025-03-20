@@ -22,10 +22,11 @@ class Base64ImageField(serializers.ImageField):
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    image = Base64ImageField(required=False)
+    avatar = Base64ImageField(required=False)
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar')
+        #fields = '__all__'
         model = User
 
     def get_is_subscribed(self, obj):
@@ -39,3 +40,11 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = UserCreateSerializer.Meta.fields + ('username',)
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField()
+
+    class Meta:
+        fields = ('avatar',)
+        model = User

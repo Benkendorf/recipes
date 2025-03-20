@@ -25,6 +25,7 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 
 class RecipeViewset(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
     queryset = Recipe.objects.all().order_by('name')
     permission_classes = [IsAuthenticatedOrReadOnly,]
 
