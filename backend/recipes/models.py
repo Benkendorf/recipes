@@ -28,6 +28,10 @@ class Recipe(models.Model):
     text = models.TextField()
     cooking_time = models.IntegerField()
     #short_link = models.SlugField()
+    datetime_created = models.DateTimeField(
+        'Дата создания',
+        auto_now_add=True
+    )
 
     author = models.ForeignKey(
         CustomUser,

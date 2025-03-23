@@ -1,6 +1,8 @@
 import logging
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
+
 from rest_framework import serializers
 
 from .models import Favorites, Ingredient, Recipe, RecipeIngredient, RecipeTag, ShoppingCart, Tag
@@ -57,12 +59,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
 
     def get_is_favorited(self, obj):
+        if isinstance(self.context['request'].user, AnonymousUser):
+            return False
         return Favorites.objects.filter(
             recipe=obj,
             list_owner=self.context['request'].user
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
+        if isinstance(self.context['request'].user, AnonymousUser):
+            return False
         return ShoppingCart.objects.filter(
             recipe=obj,
             cart_owner=self.context['request'].user
@@ -83,7 +89,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Recipe
-
+    """
     def get_is_favorited(self, obj):
         return Favorites.objects.filter(
             recipe=obj,
@@ -95,7 +101,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe=obj,
             cart_owner=self.context['request'].user
         ).exists()
-
+    """
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')

@@ -1,6 +1,7 @@
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 from djoser.serializers import UserCreateSerializer
 
@@ -30,6 +31,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
     def get_is_subscribed(self, obj):
+        if isinstance(self.context['request'].user, AnonymousUser):
+            return False
         return Subscription.objects.filter(
             subscriber=self.context['request'].user,
             subscribed_to=obj

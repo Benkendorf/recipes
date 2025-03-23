@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from .filters import RecipeFilter
 from .models import Ingredient, Recipe, Tag
 from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
 
@@ -26,8 +27,12 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 class RecipeViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
-    queryset = Recipe.objects.all().order_by('name')
+    #queryset = Recipe.objects.all().order_by('name')
+    queryset = Recipe.objects.all().order_by('-datetime_created')
     permission_classes = [IsAuthenticatedOrReadOnly,]
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(
