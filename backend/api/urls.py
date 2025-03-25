@@ -2,7 +2,8 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 #from users.views import UserViewset
-from recipes.views import IngredientViewset, RecipeViewset, TagViewset
+from recipes.views import (IngredientViewset, RecipeViewset,
+                           RecipeShortLinkAPIView, TagViewset)
 from users.views import CustomUserViewSet
 
 app_name = 'api'
@@ -18,4 +19,9 @@ urlpatterns = [
     path('users/me/avatar/', CustomUserViewSet.as_view({'put': 'avatar',
                                                         'delete': 'avatar'}), name='avatar'),
     path('', include(router.urls)),
+    path(
+        'recipes/<int:pk>/get-link/',
+        RecipeShortLinkAPIView.as_view(),
+        name='recipe-get-link'
+    ),
 ]

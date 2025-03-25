@@ -1,0 +1,2 @@
+SHORT_LINK_DOMAIN = "http://localhost"
+SHORT_LINK_MIN_LENGTH = 3

@@ -1,6 +1,13 @@
+import logging
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
 
+from sqids import Sqids
+
+from .constants import SHORT_LINK_DOMAIN, SHORT_LINK_MIN_LENGTH
 
 #User = get_user_model()
 from users.models import CustomUser
@@ -54,6 +61,13 @@ class Recipe(models.Model):
 
     class Meta:
         default_related_name = 'recipes'
+
+    def get_short_link(self):
+        sqids = Sqids(
+            min_length=SHORT_LINK_MIN_LENGTH,
+        )
+        short_code = sqids.encode([self.id])
+        return f"{SHORT_LINK_DOMAIN}/s/{short_code}"
 
 
 class RecipeTag(models.Model):
