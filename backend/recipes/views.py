@@ -1,12 +1,12 @@
 import logging
 
 from django.conf import settings
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets, status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,7 +14,7 @@ from sqids import Sqids
 
 from .constants import SHORT_LINK_MIN_LENGTH
 from .filters import RecipeFilter
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, Recipe, ShoppingCart, Tag
 from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
 
 
@@ -82,3 +82,45 @@ def redirect_short_link(request, code):
         return redirect(f'/recipes/{recipe_id}')
     except Recipe.DoesNotExist:
         return redirect('/')
+
+
+class ShoppingCartAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request, pk):
+        if ShoppingCart.objects.filter(
+            cart_owner=self.request.user,
+            recipe=Recipe.objects.get(pk=pk)
+        ).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            new_cart_item = ShoppingCart.objects.create(
+                cart_owner=self.request.user,
+                recipe=Recipe.objects.get(pk=pk)
+            )
+            serializer = RecipeCreateSerializer(data=new_cart_item)
+            serializer.is_valid()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+    def delete(self, request, pk):
+        if not ShoppingCart.objects.filter(
+            cart_owner=self.request.user,
+            recipe=get_object_or_404(Recipe, pk=pk)
+        ).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            existing_cart_item = ShoppingCart.objects.filter(
+                cart_owner=self.request.user,
+                recipe=get_object_or_404(Recipe, pk=pk)
+            )
+            existing_cart_item.delete()
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
+            )
