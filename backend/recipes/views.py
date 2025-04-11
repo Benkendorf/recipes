@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -55,6 +56,8 @@ class RecipeViewset(viewsets.ModelViewSet):
 
 
 class RecipeShortLinkAPIView(APIView):
+    http_method_names = ['get', 'head']
+
     def get(self, request, pk):
         try:
             recipe = Recipe.objects.get(pk=pk)
@@ -86,6 +89,7 @@ def redirect_short_link(request, code):
 
 class ShoppingCartAPIView(APIView):
     permission_classes = [IsAuthenticated,]
+    http_method_names = ['post', 'head', 'delete']
 
     def post(self, request, pk):
         if ShoppingCart.objects.filter(
@@ -124,3 +128,36 @@ class ShoppingCartAPIView(APIView):
             return Response(
                 status=status.HTTP_204_NO_CONTENT
             )
+
+
+class ShoppingCartDownloadAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+    http_method_names = ['get', 'head']
+
+    def get(self, request):
+        cart_recipes = ShoppingCart.objects.filter(
+            cart_owner=request.user
+        ).values_list('recipe__name',
+                      'recipe__ingredients',
+                      'recipe__ingredients__name',
+                      'recipe__ingredients__measurement_unit',
+                      'recipe__recipe_ingredients__amount')
+
+        ing_dict = {}
+        for recipe in list(cart_recipes):
+            if recipe[1] in ing_dict:
+                ing_dict[recipe[1]]['ing_amount'] += recipe[4]
+            else:
+                ing_dict[recipe[1]] = {
+                    'ing_name': recipe[2],
+                    'ing_unit': recipe[3],
+                    'ing_amount': recipe[4],
+                }
+
+        response_string = ''
+        for ing in ing_dict.values():
+            response_string += (f'{ing["ing_name"]} - {ing["ing_amount"]}'
+                                f' {ing["ing_unit"]}' + '\n')
+
+        response = HttpResponse(response_string, content_type='text/plain')
+        return response
