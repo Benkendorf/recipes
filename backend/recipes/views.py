@@ -15,7 +15,7 @@ from sqids import Sqids
 
 from .constants import SHORT_LINK_MIN_LENGTH
 from .filters import RecipeFilter
-from .models import Ingredient, Recipe, ShoppingCart, Tag
+from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
 from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
 
 
@@ -161,3 +161,46 @@ class ShoppingCartDownloadAPIView(APIView):
 
         response = HttpResponse(response_string, content_type='text/plain')
         return response
+
+
+class FavoritesAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+    http_method_names = ['post', 'head', 'delete']
+
+    def post(self, request, pk):
+        if Favorites.objects.filter(
+            list_owner=self.request.user,
+            recipe=Recipe.objects.get(pk=pk)
+        ).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            new_list_item = Favorites.objects.create(
+                list_owner=self.request.user,
+                recipe=Recipe.objects.get(pk=pk)
+            )
+            serializer = RecipeCreateSerializer(data=new_list_item)
+            serializer.is_valid()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+    def delete(self, request, pk):
+        if not Favorites.objects.filter(
+            list_owner=self.request.user,
+            recipe=get_object_or_404(Recipe, pk=pk)
+        ).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            existing_list_item = Favorites.objects.filter(
+                list_owner=self.request.user,
+                recipe=get_object_or_404(Recipe, pk=pk)
+            )
+            existing_list_item.delete()
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
+            )

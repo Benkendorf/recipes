@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 #from users.views import UserViewset
 from recipes.views import (IngredientViewset, RecipeViewset,
-                           RecipeShortLinkAPIView, ShoppingCartAPIView,
+                           RecipeShortLinkAPIView, ShoppingCartAPIView, FavoritesAPIView,
                            ShoppingCartDownloadAPIView, TagViewset)
 from users.views import CustomUserViewSet
 
@@ -29,6 +29,11 @@ urlpatterns = [
         'recipes/<int:pk>/get-link/',
         RecipeShortLinkAPIView.as_view(),
         name='recipe-get-link'
+    ),
+    path(
+        'recipes/<int:pk>/favorite/',
+        FavoritesAPIView.as_view(),
+        name='favorites'
     ),
     path(
         'recipes/<int:pk>/shopping_cart/',
