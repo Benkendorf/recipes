@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from recipes.views import (IngredientViewset, RecipeViewset,
                            RecipeShortLinkAPIView, ShoppingCartAPIView, FavoritesAPIView,
                            ShoppingCartDownloadAPIView, TagViewset)
-from users.views import CustomUserViewSet
+from users.views import CustomUserViewSet, SubcriptionAPIView
 
 app_name = 'api'
 
@@ -14,11 +14,16 @@ router = DefaultRouter()
 router.register('tags', TagViewset, basename='tag')
 router.register('ingredients', IngredientViewset, basename='ingredient')
 router.register('recipes', RecipeViewset, basename='recipe')
-#router.register('users', UserViewset, basename='user')
+router.register('users', CustomUserViewSet, basename='user')
 
 urlpatterns = [
     path('users/me/avatar/', CustomUserViewSet.as_view({'put': 'avatar',
                                                         'delete': 'avatar'}), name='avatar'),
+    path(
+        'users/subscriptions/',
+        SubcriptionAPIView.as_view(),
+        name='subscriptions'
+    ),
     path(
         'recipes/download_shopping_cart/',
         ShoppingCartDownloadAPIView.as_view(),

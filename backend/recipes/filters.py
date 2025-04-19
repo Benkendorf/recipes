@@ -13,7 +13,7 @@ class RecipeFilter(django_filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['tags', 'is_in_shopping_cart', 'is_favorited']
+        fields = ['tags', 'is_in_shopping_cart', 'is_favorited', 'author']
 
     def filter_by_tags(self, queryset, name, value):
         tags = self.request.GET.getlist('tags')

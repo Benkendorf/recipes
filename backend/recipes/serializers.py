@@ -161,3 +161,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeSerializer(instance, context=self.context).data
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    recipes = RecipeSerializer(many=True, required=False)
+
+    class Meta:
+        fields = ('__all__')
+        model = User
