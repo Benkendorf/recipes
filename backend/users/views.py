@@ -1,5 +1,7 @@
 import logging
 
+from django.shortcuts import get_object_or_404
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -49,12 +51,17 @@ class SubcriptionAPIView(APIView):
 
     def get(self, request):
         subs = CustomUser.objects.filter(
-            followers__subscriber=request.user
+            follows__subscriber=request.user
         ).distinct()
 
         logging.debug(subs)
 
-        serializer = SubscriptionSerializer(data=subs)
+        serializer = SubscriptionSerializer(
+            data=subs,
+            many=True,
+            context={'request': request}
+        )
+
         logging.debug(serializer.initial_data)
         serializer.is_valid()
         logging.debug(serializer.data)
@@ -81,4 +88,22 @@ class SubcriptionAPIView(APIView):
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
+            )
+
+    def delete(self, request, pk):
+        if not Subscription.objects.filter(
+            subscriber=self.request.user,
+            subscribed_to=CustomUser.objects.get(pk=pk)
+        ).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            existing_cart_item = Subscription.objects.filter(
+                subscriber=self.request.user,
+                subscribed_to=CustomUser.objects.get(pk=pk)
+            )
+            existing_cart_item.delete()
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
             )

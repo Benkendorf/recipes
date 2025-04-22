@@ -163,9 +163,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return RecipeSerializer(instance, context=self.context).data
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class SubscriptionSerializer(UserSerializer):
     recipes = RecipeSerializer(many=True, required=False)
 
     class Meta:
-        fields = ('__all__')
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar', 'recipes')
         model = User

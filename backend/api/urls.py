@@ -19,6 +19,7 @@ router.register('users', CustomUserViewSet, basename='user')
 urlpatterns = [
     path('users/me/avatar/', CustomUserViewSet.as_view({'put': 'avatar',
                                                         'delete': 'avatar'}), name='avatar'),
+    path('users/<int:pk>/subscribe/', SubcriptionAPIView.as_view(), name='subscribe'),
     path(
         'users/subscriptions/',
         SubcriptionAPIView.as_view(),
