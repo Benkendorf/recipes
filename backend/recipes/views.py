@@ -16,7 +16,7 @@ from sqids import Sqids
 from .constants import SHORT_LINK_MIN_LENGTH
 from .filters import RecipeFilter
 from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
-from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, TagSerializer
+from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, ShortRecipeSerializer, TagSerializer
 
 
 class TagViewset(viewsets.ModelViewSet):
@@ -104,8 +104,8 @@ class ShoppingCartAPIView(APIView):
                 cart_owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )
-            serializer = RecipeCreateSerializer(data=new_cart_item)
-            serializer.is_valid()
+            new_cart_recipe = Recipe.objects.get(pk=pk)
+            serializer = ShortRecipeSerializer(instance=new_cart_recipe)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
@@ -180,8 +180,8 @@ class FavoritesAPIView(APIView):
                 list_owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )
-            serializer = RecipeCreateSerializer(data=new_list_item)
-            serializer.is_valid()
+            new_list_recipe = Recipe.objects.get(pk=pk)
+            serializer = ShortRecipeSerializer(instance=new_list_recipe)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED

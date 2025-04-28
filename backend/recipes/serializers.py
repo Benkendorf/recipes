@@ -163,9 +163,40 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return RecipeSerializer(instance, context=self.context).data
 
 
-class SubscriptionSerializer(UserSerializer):
-    recipes = RecipeSerializer(many=True, required=False)
+class ShortRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar', 'recipes')
+        fields = ('id', 'name', 'image', 'cooking_time')
+        model = Recipe
+
+
+class SubscriptionSerializer(UserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar', 'recipes', 'recipes_count')
         model = User
+
+    def get_recipes(self, obj):
+        recipes_limit = int(self.context['request'].query_params.get('recipes_limit', '-1'))
+        recipes_to_serialize = []
+        if recipes_limit == -1:
+            recipes_to_serialize = Recipe.objects.filter(
+                author=obj
+            )
+        else:
+            recipes_to_serialize = Recipe.objects.filter(
+                author=obj
+            )[:recipes_limit]
+
+        return ShortRecipeSerializer(
+            recipes_to_serialize,
+            many=True,
+            required=False,
+        ).data
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(
+            author=obj
+        ).count()

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
@@ -47,28 +48,24 @@ class CustomUserViewSet(UserViewSet):
 
 class SubcriptionAPIView(APIView):
     permission_classes = [IsAuthenticated,]
+    pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'head', 'delete']
 
     def get(self, request):
         subs = CustomUser.objects.filter(
             follows__subscriber=request.user
-        ).distinct()
+        ).distinct().order_by('username')
 
-        logging.debug(subs)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(subs, request)
 
         serializer = SubscriptionSerializer(
-            data=subs,
+            instance=page,
             many=True,
             context={'request': request}
         )
 
-        logging.debug(serializer.initial_data)
-        serializer.is_valid()
-        logging.debug(serializer.data)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return paginator.get_paginated_response(serializer.data)
 
     def post(self, request, pk):
         if self.request.user.pk == pk or Subscription.objects.filter(
@@ -83,8 +80,13 @@ class SubcriptionAPIView(APIView):
                 subscriber=self.request.user,
                 subscribed_to=CustomUser.objects.get(pk=pk)
             )
-            serializer = SubscriptionSerializer(data=new_sub)
-            serializer.is_valid()
+            new_subbed_to = CustomUser.objects.get(pk=pk)
+            logging.debug(new_subbed_to)
+            serializer = SubscriptionSerializer(
+                instance=new_subbed_to,
+                context={'request': request}
+            )
+            logging.debug(serializer.data)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
