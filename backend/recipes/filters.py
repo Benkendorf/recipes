@@ -1,4 +1,3 @@
-import logging
 import django_filters
 
 from django.db.models import Q
@@ -27,8 +26,10 @@ class RecipeFilter(django_filters.FilterSet):
         if not user.is_authenticated:
             return queryset.none()
 
-        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
-        cart_recipe_ids = ShoppingCart.objects.filter(cart_owner=user).values_list('recipe_id', flat=True)
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart')
+        cart_recipe_ids = ShoppingCart.objects.filter(
+            cart_owner=user).values_list('recipe_id', flat=True)
         if is_in_shopping_cart == '1':
             return queryset.filter(id__in=cart_recipe_ids)
         return queryset.exclude(id__in=cart_recipe_ids)
@@ -39,7 +40,8 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset.none()
 
         is_favorited = self.request.query_params.get('is_favorited')
-        favorites_recipe_ids = Favorites.objects.filter(list_owner=user).values_list('recipe_id', flat=True)
+        favorites_recipe_ids = Favorites.objects.filter(
+            list_owner=user).values_list('recipe_id', flat=True)
         if is_favorited == '1':
             return queryset.filter(id__in=favorites_recipe_ids)
         return queryset.exclude(id__in=favorites_recipe_ids)

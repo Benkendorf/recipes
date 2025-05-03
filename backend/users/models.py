@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-#from recipes.models import Recipe, Favorites, ShoppingCart
-
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)

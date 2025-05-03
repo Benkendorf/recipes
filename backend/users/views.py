@@ -1,8 +1,6 @@
 import logging
 
-from django.shortcuts import get_object_or_404
-
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -12,7 +10,7 @@ from rest_framework.views import APIView
 from djoser.views import UserViewSet
 
 from .models import CustomUser, Subscription
-from .serializers import AvatarSerializer, CustomUserCreateSerializer, UserSerializer
+from .serializers import AvatarSerializer, UserSerializer
 
 from recipes.serializers import SubscriptionSerializer
 
@@ -20,18 +18,17 @@ from recipes.serializers import SubscriptionSerializer
 class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all().order_by('username')
     serializer_class = UserSerializer
-    permission_classes = [AllowAny,]
+    permission_classes = [AllowAny, ]
 
-    @action(detail=False, methods=['put', 'delete'], permission_classes=[IsAuthenticated,])
+    @action(detail=False, methods=['put', 'delete'],
+            permission_classes=[IsAuthenticated, ])
     def avatar(self, request):
-        #self.get_object = self.get_instance
         user = self.get_instance()
         serializer = AvatarSerializer(data=request.data)
         if request.method == 'PUT':
             if serializer.is_valid():
                 user.avatar = serializer.validated_data['avatar']
                 user.save()
-                #serializer.save()
                 response_serializer = AvatarSerializer(
                     data={'avatar': user.avatar}
                 )
@@ -47,7 +44,7 @@ class CustomUserViewSet(UserViewSet):
 
 
 class SubcriptionAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'head', 'delete']
 
@@ -76,7 +73,7 @@ class SubcriptionAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         else:
-            new_sub = Subscription.objects.create(
+            Subscription.objects.create(
                 subscriber=self.request.user,
                 subscribed_to=CustomUser.objects.get(pk=pk)
             )

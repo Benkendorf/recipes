@@ -1,11 +1,10 @@
-import logging
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from rest_framework import serializers
 
-from .models import Favorites, Ingredient, Recipe, RecipeIngredient, RecipeTag, ShoppingCart, Tag
+from .models import (Favorites, Ingredient, Recipe, RecipeIngredient,
+                     RecipeTag, ShoppingCart, Tag)
 from users.serializers import Base64ImageField, UserSerializer
 
 User = get_user_model()
@@ -49,7 +48,10 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer()
     tags = TagSerializer(many=True)
-    ingredients = RecipeIngredientSerializer(many=True, source='recipe_ingredients')
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        source='recipe_ingredients'
+    )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -89,19 +91,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Recipe
-    """
-    def get_is_favorited(self, obj):
-        return Favorites.objects.filter(
-            recipe=obj,
-            list_owner=self.context['request'].user
-        ).exists()
 
-    def get_is_in_shopping_cart(self, obj):
-        return ShoppingCart.objects.filter(
-            recipe=obj,
-            cart_owner=self.context['request'].user
-        ).exists()
-    """
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
@@ -175,11 +165,13 @@ class SubscriptionSerializer(UserSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar', 'recipes', 'recipes_count')
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'avatar', 'recipes', 'recipes_count')
         model = User
 
     def get_recipes(self, obj):
-        recipes_limit = int(self.context['request'].query_params.get('recipes_limit', '-1'))
+        recipes_limit = int(self.context['request'].query_params.get(
+            'recipes_limit', '-1'))
         recipes_to_serialize = []
         if recipes_limit == -1:
             recipes_to_serialize = Recipe.objects.filter(

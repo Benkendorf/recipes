@@ -1,13 +1,11 @@
-import logging
-
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import filters, mixins, viewsets, status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, status
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -16,7 +14,9 @@ from sqids import Sqids
 from .constants import SHORT_LINK_MIN_LENGTH
 from .filters import RecipeFilter
 from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
-from .serializers import IngredientSerializer, RecipeSerializer, RecipeCreateSerializer, ShortRecipeSerializer, TagSerializer
+from .serializers import (IngredientSerializer, RecipeSerializer,
+                          RecipeCreateSerializer, ShortRecipeSerializer,
+                          TagSerializer)
 
 
 class TagViewset(viewsets.ModelViewSet):
@@ -39,7 +39,7 @@ class IngredientViewset(viewsets.ModelViewSet):
 class RecipeViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
     queryset = Recipe.objects.all().order_by('-datetime_created')
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -80,15 +80,13 @@ def redirect_short_link(request, code):
     if not decoded_ids:
         return redirect('/')
     recipe_id = decoded_ids[0]
-    try:
-        recipe = Recipe.objects.get(id=recipe_id)
+    if Recipe.objects.filter(id=recipe_id).exists():
         return redirect(f'/recipes/{recipe_id}')
-    except Recipe.DoesNotExist:
-        return redirect('/')
+    return redirect('/')
 
 
 class ShoppingCartAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     http_method_names = ['post', 'head', 'delete']
 
     def post(self, request, pk):
@@ -100,7 +98,7 @@ class ShoppingCartAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         else:
-            new_cart_item = ShoppingCart.objects.create(
+            ShoppingCart.objects.create(
                 cart_owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )
@@ -131,7 +129,7 @@ class ShoppingCartAPIView(APIView):
 
 
 class ShoppingCartDownloadAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     http_method_names = ['get', 'head']
 
     def get(self, request):
@@ -164,7 +162,7 @@ class ShoppingCartDownloadAPIView(APIView):
 
 
 class FavoritesAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     http_method_names = ['post', 'head', 'delete']
 
     def post(self, request, pk):
@@ -176,7 +174,7 @@ class FavoritesAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         else:
-            new_list_item = Favorites.objects.create(
+            Favorites.objects.create(
                 list_owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )

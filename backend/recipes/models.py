@@ -1,15 +1,10 @@
-import logging
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import models
-from django.urls import reverse
 
 from sqids import Sqids
 
 from .constants import SHORT_LINK_DOMAIN, SHORT_LINK_MIN_LENGTH
 
-#User = get_user_model()
 from users.models import CustomUser
 
 
@@ -20,6 +15,9 @@ class Tag(models.Model):
     class Meta:
         default_related_name = 'tags'
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=256)
@@ -28,13 +26,15 @@ class Ingredient(models.Model):
     class Meta:
         default_related_name = 'ingredients'
 
+    def __str__(self):
+        return self.name
+
 
 class Recipe(models.Model):
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, verbose_name='Название')
     image = models.ImageField(upload_to='recipes')
     text = models.TextField()
     cooking_time = models.IntegerField()
-    #short_link = models.SlugField()
     datetime_created = models.DateTimeField(
         'Дата создания',
         auto_now_add=True
@@ -55,12 +55,14 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        #through_fields=('recipe', 'ingredient'),
         verbose_name='Ингредиенты'
     )
 
     class Meta:
         default_related_name = 'recipes'
+
+    def __str__(self):
+        return self.name
 
     def get_short_link(self):
         sqids = Sqids(
@@ -109,13 +111,17 @@ class Favorites(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
+        related_name='favorites'
     )
     list_owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Владелец списка избранного'
     )
+
+    class Meta:
+        verbose_name_plural = 'Favorites'
 
 
 class ShoppingCart(models.Model):

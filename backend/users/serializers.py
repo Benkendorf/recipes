@@ -26,8 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField(required=False)
 
     class Meta:
-        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar')
-        #fields = '__all__'
+        fields = ('id', 'email', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'avatar')
         model = User
 
     def get_is_subscribed(self, obj):
