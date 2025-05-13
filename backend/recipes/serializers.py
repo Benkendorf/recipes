@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-
 from rest_framework import serializers
+from users.serializers import Base64ImageField, UserSerializer
 
 from .models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                      RecipeTag, ShoppingCart, Tag)
-from users.serializers import Base64ImageField, UserSerializer
 
 User = get_user_model()
 

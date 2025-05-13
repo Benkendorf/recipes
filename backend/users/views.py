@@ -1,18 +1,16 @@
 import logging
 
+from djoser.views import UserViewSet
+from recipes.serializers import SubscriptionSerializer
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from djoser.views import UserViewSet
 
 from .models import CustomUser, Subscription
 from .serializers import AvatarSerializer, UserSerializer
-
-from recipes.serializers import SubscriptionSerializer
 
 
 class CustomUserViewSet(UserViewSet):

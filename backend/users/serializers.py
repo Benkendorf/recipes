@@ -1,10 +1,9 @@
 import base64
-from django.core.files.base import ContentFile
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-
+from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
-
 from rest_framework import serializers
 
 from .models import Subscription

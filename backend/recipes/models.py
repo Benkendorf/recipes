@@ -1,11 +1,9 @@
 
 from django.db import models
-
 from sqids import Sqids
+from users.models import CustomUser
 
 from .constants import SHORT_LINK_DOMAIN, SHORT_LINK_MIN_LENGTH
-
-from users.models import CustomUser
 
 
 class Tag(models.Model):

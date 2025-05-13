@@ -21,11 +21,6 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1, localhost').split(', ')
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-#CORS_ALLOWED_ORIGINS = [
-#    "http://localhost:8000",
-#]
-
-
 # Application definition
 
 INSTALLED_APPS = [

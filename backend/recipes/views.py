@@ -1,21 +1,18 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-
 from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from sqids import Sqids
 
 from .constants import SHORT_LINK_MIN_LENGTH
 from .filters import RecipeFilter
 from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
-from .serializers import (IngredientSerializer, RecipeSerializer,
-                          RecipeCreateSerializer, ShortRecipeSerializer,
+from .serializers import (IngredientSerializer, RecipeCreateSerializer,
+                          RecipeSerializer, ShortRecipeSerializer,
                           TagSerializer)
 
 
