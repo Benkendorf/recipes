@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
+from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag, RecipeIngredient, RecipeTag
 
 
 @admin.register(Tag)
@@ -8,10 +8,24 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
 
 
+@admin.register(RecipeTag)
+class RecipeTagAdmin(admin.ModelAdmin):
+    list_display = ('recipe', 'tag')
+
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ('recipe', 'ingredient')
+
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
+
+
+class IngredientInline(admin.TabularInline):
+    model = RecipeIngredient
 
 
 @admin.register(Recipe)
@@ -21,6 +35,10 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username')
     list_filter = ('tags',)
     filter_horizontal = ('tags', 'ingredients')
+
+    inlines = [
+        IngredientInline,
+    ]
 
     @admin.display(description='Добавлений в избранное')
     def favorites_count(self, obj):

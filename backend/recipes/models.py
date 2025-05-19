@@ -8,7 +8,7 @@ from .constants import SHORT_LINK_DOMAIN, SHORT_LINK_MIN_LENGTH
 
 class Tag(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     class Meta:
         default_related_name = 'tags'
