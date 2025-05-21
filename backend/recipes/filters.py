@@ -23,7 +23,7 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset.none()
 
         cart_recipe_ids = ShoppingCart.objects.filter(
-            cart_owner=user).values_list('recipe_id', flat=True)
+            owner=user).values_list('recipe_id', flat=True)
         if value:
             return queryset.filter(id__in=cart_recipe_ids)
         return queryset.exclude(id__in=cart_recipe_ids)
@@ -34,7 +34,7 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset.none()
 
         favorites_recipe_ids = Favorites.objects.filter(
-            list_owner=user).values_list('recipe_id', flat=True)
+            owner=user).values_list('recipe_id', flat=True)
         if value:
             return queryset.filter(id__in=favorites_recipe_ids)
         return queryset.exclude(id__in=favorites_recipe_ids)

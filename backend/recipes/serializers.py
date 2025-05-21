@@ -64,7 +64,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return Favorites.objects.filter(
             recipe=obj,
-            list_owner=self.context['request'].user
+            owner=self.context['request'].user
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
@@ -72,7 +72,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return ShoppingCart.objects.filter(
             recipe=obj,
-            cart_owner=self.context['request'].user
+            owner=self.context['request'].user
         ).exists()
 
 

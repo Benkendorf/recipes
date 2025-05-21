@@ -63,9 +63,9 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Favorites)
 class FavoritesAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'list_owner')
+    list_display = ('recipe', 'owner')
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'cart_owner')
+    list_display = ('recipe', 'owner')

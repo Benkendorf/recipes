@@ -88,7 +88,7 @@ class ShoppingCartAPIView(APIView):
 
     def post(self, request, pk):
         if ShoppingCart.objects.filter(
-            cart_owner=self.request.user,
+            owner=self.request.user,
             recipe=Recipe.objects.get(pk=pk)
         ).exists():
             return Response(
@@ -96,7 +96,7 @@ class ShoppingCartAPIView(APIView):
             )
         else:
             ShoppingCart.objects.create(
-                cart_owner=self.request.user,
+                owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )
             new_cart_recipe = Recipe.objects.get(pk=pk)
@@ -108,7 +108,7 @@ class ShoppingCartAPIView(APIView):
 
     def delete(self, request, pk):
         if not ShoppingCart.objects.filter(
-            cart_owner=self.request.user,
+            owner=self.request.user,
             recipe=get_object_or_404(Recipe, pk=pk)
         ).exists():
             return Response(
@@ -116,7 +116,7 @@ class ShoppingCartAPIView(APIView):
             )
         else:
             existing_cart_item = ShoppingCart.objects.filter(
-                cart_owner=self.request.user,
+                owner=self.request.user,
                 recipe=get_object_or_404(Recipe, pk=pk)
             )
             existing_cart_item.delete()
@@ -131,7 +131,7 @@ class ShoppingCartDownloadAPIView(APIView):
 
     def get(self, request):
         cart_recipes = ShoppingCart.objects.filter(
-            cart_owner=request.user
+            owner=request.user
         ).values_list('recipe__name',
                       'recipe__ingredients',
                       'recipe__ingredients__name',
@@ -164,7 +164,7 @@ class FavoritesAPIView(APIView):
 
     def post(self, request, pk):
         if Favorites.objects.filter(
-            list_owner=self.request.user,
+            owner=self.request.user,
             recipe=Recipe.objects.get(pk=pk)
         ).exists():
             return Response(
@@ -172,7 +172,7 @@ class FavoritesAPIView(APIView):
             )
         else:
             Favorites.objects.create(
-                list_owner=self.request.user,
+                owner=self.request.user,
                 recipe=Recipe.objects.get(pk=pk)
             )
             new_list_recipe = Recipe.objects.get(pk=pk)
@@ -184,7 +184,7 @@ class FavoritesAPIView(APIView):
 
     def delete(self, request, pk):
         if not Favorites.objects.filter(
-            list_owner=self.request.user,
+            owner=self.request.user,
             recipe=get_object_or_404(Recipe, pk=pk)
         ).exists():
             return Response(
@@ -192,7 +192,7 @@ class FavoritesAPIView(APIView):
             )
         else:
             existing_list_item = Favorites.objects.filter(
-                list_owner=self.request.user,
+                owner=self.request.user,
                 recipe=get_object_or_404(Recipe, pk=pk)
             )
             existing_list_item.delete()
