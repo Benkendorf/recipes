@@ -1,5 +1,7 @@
 import logging
 
+from django.db.models import Count
+
 from djoser.views import UserViewSet
 from recipes.serializers import SubscriptionSerializer
 from rest_framework import status
@@ -49,7 +51,8 @@ class SubcriptionAPIView(APIView):
     def get(self, request):
         subs = CustomUser.objects.filter(
             follows__subscriber=request.user
-        ).distinct().order_by('username')
+        ).distinct().order_by('username').annotate(
+            recipes_count=Count('recipes'))
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(subs, request)

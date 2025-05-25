@@ -75,7 +75,7 @@ class Recipe(models.Model):
 
     tags = models.ManyToManyField(
         Tag,
-        through='RecipeTag',
+        #through='RecipeTag',
         verbose_name='Тэги'
     )
 
@@ -100,28 +100,6 @@ class Recipe(models.Model):
         )
         short_code = sqids.encode([self.id])
         return f"{SHORT_LINK_DOMAIN}/s/{short_code}"
-
-
-class RecipeTag(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Тэг'
-    )
-
-    class Meta:
-        unique_together = ('recipe', 'tag')
-        ordering = ['recipe']
-        verbose_name = 'РецептТэг'
-        verbose_name_plural = 'РецептТэги'
-
-    def __str__(self):
-        return f'{self.recipe} помечен тэгом {self.tag}'
 
 
 class RecipeIngredient(models.Model):
@@ -156,45 +134,29 @@ class RecipeIngredient(models.Model):
 
 
 class BaseUserRecipeList(models.Model):
-    _recipe_related_name = None
-    _owner_related_name = None
-
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
-        related_name=_recipe_related_name,
+        related_name='%(class)s_recipes',
     )
     owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Владелец списка',
-        related_name=_owner_related_name,
+        related_name='%(class)s',
     )
 
     class Meta:
         abstract = True
         unique_together = ('recipe', 'owner')
-        ordering = ['owner']
-
-    def __str__(self):
-        return (f'{self.owner} добавил {self.recipe} в'
-                f' {self._meta.verbose_name}')
 
 
 class Favorites(BaseUserRecipeList):
-    _recipe_related_name = 'favorites'
-    _owner_related_name = 'favorites'
-
     class Meta(BaseUserRecipeList.Meta):
         verbose_name = 'Рецепт в избранном'
-        verbose_name_plural = 'Рецепты в избранном'
 
 
 class ShoppingCart(BaseUserRecipeList):
-    _recipe_related_name = 'shopping_carts'
-    _owner_related_name = 'shopping_carts'
-
     class Meta(BaseUserRecipeList.Meta):
         verbose_name = 'Рецепт в списке покупок'
-        verbose_name_plural = 'Рецепты в списке покупок'
