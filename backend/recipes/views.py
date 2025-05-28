@@ -1,3 +1,4 @@
+from rest_framework.decorators import action
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,35 +10,36 @@ from rest_framework.views import APIView
 from sqids import Sqids
 
 from .constants import SHORT_LINK_MIN_LENGTH
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShortRecipeSerializer,
                           TagSerializer)
 
 
-class TagViewset(viewsets.ModelViewSet):
-    queryset = Tag.objects.all().order_by('name')
+class BaseDataViewset(viewsets.ReadOnlyModelViewSet):
+    pagination_class = None
+
+
+class TagViewset(BaseDataViewset):
+    queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
-    pagination_class = None
 
-
-class IngredientViewset(viewsets.ModelViewSet):
+class IngredientViewset(BaseDataViewset):
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    pagination_class = None
-
-    def get_queryset(self):
-        return Ingredient.objects.filter(
-            name__startswith=self.request.query_params['name']
-        ).order_by('name')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
-    queryset = Recipe.objects.all().order_by('-datetime_created')
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
+    queryset = Recipe.objects.all().select_related('author').prefetch_related(
+        'ingredients').prefetch_related('tags').order_by('-datetime_created')
+
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -51,22 +53,20 @@ class RecipeViewset(viewsets.ModelViewSet):
             return RecipeCreateSerializer
         return RecipeSerializer
 
-
-class RecipeShortLinkAPIView(APIView):
-    http_method_names = ['get', 'head']
-
-    def get(self, request, pk):
-        try:
-            recipe = Recipe.objects.get(pk=pk)
-            return Response(
-                {"short-link": recipe.get_short_link()},
-                status=status.HTTP_200_OK
-            )
-        except Recipe.DoesNotExist:
-            return Response(
-                {"error": "Рецепт не найден"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    @action(detail=False, methods=['get', 'head'])
+    def short_link(self, request, pk):
+        if request.method == 'GET':
+            try:
+                recipe = Recipe.objects.get(pk=pk)
+                return Response(
+                    {"short-link": recipe.get_short_link()},
+                    status=status.HTTP_200_OK
+                )
+            except Recipe.DoesNotExist:
+                return Response(
+                    {"error": "Рецепт не найден"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
 
 def redirect_short_link(request, code):

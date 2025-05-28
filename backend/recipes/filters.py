@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from .models import Favorites, Recipe, ShoppingCart, Tag
+from .models import Ingredient, Favorites, Recipe, ShoppingCart, Tag
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -38,3 +38,16 @@ class RecipeFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(id__in=favorites_recipe_ids)
         return queryset.exclude(id__in=favorites_recipe_ids)
+
+
+class IngredientFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(method='filter_by_name')
+
+    def filter_by_name(self, queryset, name, value):
+        return Ingredient.objects.filter(
+            name__startswith=value
+        )
+
+    class Meta:
+        model = Ingredient
+        fields = ['name',]
