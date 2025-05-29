@@ -180,3 +180,17 @@ class SubscriptionSerializer(UserSerializer):
             many=True,
             required=False,
         ).data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('owner', 'recipe')
+        model = ShoppingCart
+
+
+class FavoritesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('owner', 'recipe')
+        model = Favorites
