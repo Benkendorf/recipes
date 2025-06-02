@@ -2,7 +2,7 @@ from django.urls import include, path
 from recipes.views import (IngredientViewset, RecipeViewset,
                            TagViewset)
 from rest_framework.routers import DefaultRouter
-from users.views import CustomUserViewSet, SubcriptionAPIView
+from users.views import UserModelViewSet
 
 app_name = 'api'
 
@@ -11,18 +11,24 @@ router = DefaultRouter()
 router.register('tags', TagViewset, basename='tag')
 router.register('ingredients', IngredientViewset, basename='ingredient')
 router.register('recipes', RecipeViewset, basename='recipe')
-router.register('users', CustomUserViewSet, basename='user')
+router.register('users', UserModelViewSet, basename='user')
 
 urlpatterns = [
-    path('users/me/avatar/', CustomUserViewSet.as_view(
+    path('users/me/avatar/', UserModelViewSet.as_view(
         {'put': 'avatar', 'delete': 'avatar'}
     ), name='avatar'),
-    path('users/<int:pk>/subscribe/', SubcriptionAPIView.as_view(),
-         name='subscribe'),
+    path(
+        'users/<int:pk>/subscribe/',
+        UserModelViewSet.as_view({
+            'post': 'subscription_post_delete',
+            'delete': 'subscription_post_delete'}),
+        name='subscription_post_delete'
+    ),
     path(
         'users/subscriptions/',
-        SubcriptionAPIView.as_view(),
-        name='subscriptions'
+        UserModelViewSet.as_view({
+            'get': 'subscription_get'}),
+        name='subscription_get'
     ),
     path(
         'recipes/download_shopping_cart/',

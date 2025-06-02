@@ -6,7 +6,7 @@ from rest_framework import serializers
 from users.serializers import Base64ImageField, UserSerializer
 
 from .models import (Favorites, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Tag)
+                     ShoppingCart, Tag, )
 
 from .constants import COOKING_TIME_MIN_VALUE
 
@@ -173,7 +173,7 @@ class SubscriptionSerializer(UserSerializer):
         recipes_limit = int(self.context['request'].query_params.get(
             'recipes_limit', '-1'))
         recipes_to_serialize = obj.recipes.all(
-        )[:int(recipes_limit)if recipes_limit != '-1' else None]
+        )[:recipes_limit if recipes_limit != -1 else None]
 
         return ShortRecipeSerializer(
             recipes_to_serialize,

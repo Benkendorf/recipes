@@ -8,11 +8,6 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
 
 
-# @admin.register(RecipeTag)
-# class RecipeTagAdmin(admin.ModelAdmin):
-#     list_display = ('recipe', 'tag')
-
-
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient')

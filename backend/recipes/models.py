@@ -2,10 +2,11 @@ from django.core.validators import MinValueValidator
 
 from django.db import models
 from sqids import Sqids
-from users.models import CustomUser
+from users.models import UserModel
 
 from .constants import SHORT_LINK_DOMAIN, SHORT_LINK_MIN_LENGTH, TAG_NAME_MAX_LENGTH, INGREDIENT_NAME_MAX_LENGTH, RECIPE_NAME_MAX_LENGTH, MEASUREMENT_UNIT_MAX_LENGTH, COOKING_TIME_MIN_VALUE, INGREDIENT_AMOUNT_MIN_VALUE
 from .validators import cooking_time_validator, ingredient_amount_validator
+
 
 class Tag(models.Model):
     name = models.CharField(
@@ -68,14 +69,13 @@ class Recipe(models.Model):
     )
 
     author = models.ForeignKey(
-        CustomUser,
+        UserModel,
         on_delete=models.CASCADE,
         verbose_name='Автор'
     )
 
     tags = models.ManyToManyField(
         Tag,
-        #through='RecipeTag',
         verbose_name='Тэги'
     )
 
@@ -141,7 +141,7 @@ class BaseUserRecipeList(models.Model):
         related_name='%(class)s_recipes',
     )
     owner = models.ForeignKey(
-        CustomUser,
+        UserModel,
         on_delete=models.CASCADE,
         verbose_name='Владелец списка',
         related_name='%(class)s',

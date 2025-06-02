@@ -32,13 +32,12 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         if isinstance(self.context['request'].user, AnonymousUser):
             return False
-        return Subscription.objects.filter(
-            subscriber=self.context['request'].user,
-            subscribed_to=obj
-        ).exists()
+
+        return self.context['request'].user.followers.filter(
+            subscribed_to=obj).exists()
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = UserCreateSerializer.Meta.fields + ('username',)
@@ -50,3 +49,10 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('avatar',)
         model = User
+
+
+class SubscriptionCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('subscriber', 'subscribed_to')
+        model = Subscription
