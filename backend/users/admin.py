@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-
 from .forms import EmailLoginForm
-from .models import UserModel, Subscription
+from .models import Subscription, UserModel
 
 admin.site.login_form = EmailLoginForm
 

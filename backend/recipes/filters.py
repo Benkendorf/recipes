@@ -1,7 +1,6 @@
 import django_filters
-from django.db.models import Q
 
-from .models import Ingredient, Favorites, Recipe, ShoppingCart, Tag
+from .models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -50,4 +49,4 @@ class IngredientFilter(django_filters.FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ['name',]
+        fields = ['name', ]

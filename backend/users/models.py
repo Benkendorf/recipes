@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-
-from recipes.constants import USER_FIRST_NAME_MAX_LENGTH, USER_LAST_NAME_MAX_LENGTH
+from recipes.constants import (USER_FIRST_NAME_MAX_LENGTH,
+                               USER_LAST_NAME_MAX_LENGTH)
 
 
 class UserModel(AbstractUser):
