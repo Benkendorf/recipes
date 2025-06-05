@@ -31,7 +31,7 @@ class UserModelViewSet(UserViewSet):
     permission_classes = [AllowAny, ]
 
     @action(detail=False, methods=['put', 'delete'],
-            permission_classes=[IsAuthenticated, ])
+            permission_classes=[IsAuthenticated, ], url_path='me/avatar')
     def avatar(self, request):
         user = self.get_instance()
         serializer = AvatarSerializer(data=request.data)
@@ -53,7 +53,8 @@ class UserModelViewSet(UserViewSet):
 
     @action(detail=False, methods=['get', 'head'],
             permission_classes=[IsAuthenticated, ],
-            pagination_class=PageNumberPagination)
+            pagination_class=PageNumberPagination,
+            url_path='subscriptions')
     def subscription_get(self, request):
 
         if request.method == 'GET':
@@ -73,15 +74,16 @@ class UserModelViewSet(UserViewSet):
 
             return paginator.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['post', 'head', 'delete'],
+    @action(detail=True, methods=['post', 'head', 'delete'],
             permission_classes=[IsAuthenticated, ],
-            pagination_class=PageNumberPagination)
-    def subscription_post_delete(self, request, pk):
+            pagination_class=PageNumberPagination,
+            url_path='subscribe')
+    def subscription_post_delete(self, request, id):
 
         if request.method == 'POST':
-            if self.request.user.pk == pk or Subscription.objects.filter(
+            if self.request.user.pk == id or Subscription.objects.filter(
                 subscriber=self.request.user,
-                subscribed_to=UserModel.objects.get(pk=pk)
+                subscribed_to=UserModel.objects.get(pk=id)
             ).exists():
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST
@@ -89,14 +91,14 @@ class UserModelViewSet(UserViewSet):
             else:
                 serializer = SubscriptionCreateSerializer(
                     data={'subscriber': self.request.user.pk,
-                          'subscribed_to': pk}
+                          'subscribed_to': id}
                 )
                 serializer.is_valid()
                 logging.debug(serializer.errors)
                 serializer.save()
 
                 serializer_to_return = SubscriptionSerializer(
-                    instance=UserModel.objects.get(pk=pk),
+                    instance=UserModel.objects.get(pk=id),
                     context={'request': request}
                 )
 
@@ -108,7 +110,7 @@ class UserModelViewSet(UserViewSet):
         elif request.method == 'DELETE':
             if not Subscription.objects.filter(
                 subscriber=self.request.user,
-                subscribed_to=UserModel.objects.get(pk=pk)
+                subscribed_to=UserModel.objects.get(pk=id)
             ).delete():
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST
@@ -155,7 +157,7 @@ class RecipeViewset(viewsets.ModelViewSet):
             return RecipeCreateSerializer
         return RecipeSerializer
 
-    @action(detail=False, methods=['get', 'head'])
+    @action(detail=True, methods=['get', 'head'], url_path='get-link')
     def short_link(self, request, pk):
         if request.method == 'GET':
             try:
@@ -170,8 +172,8 @@ class RecipeViewset(viewsets.ModelViewSet):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-    @action(detail=False, methods=['post', 'delete', 'head'],
-            permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post', 'delete', 'head'],
+            permission_classes=[IsAuthenticated, ], url_path='shopping_cart')
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
             if ShoppingCart.objects.filter(
@@ -208,7 +210,8 @@ class RecipeViewset(viewsets.ModelViewSet):
                 )
 
     @action(detail=False, methods=['get', 'head'],
-            permission_classes=[IsAuthenticated, ])
+            permission_classes=[IsAuthenticated, ],
+            url_path='download_shopping_cart')
     def cart_download(self, request):
         if request.method == 'GET':
             cart_recipes = ShoppingCart.objects.filter(
@@ -238,8 +241,8 @@ class RecipeViewset(viewsets.ModelViewSet):
             response = HttpResponse(response_string, content_type='text/plain')
             return response
 
-    @action(detail=False, methods=['post', 'delete', 'head'],
-            permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post', 'delete', 'head'],
+            permission_classes=[IsAuthenticated, ], url_path='favorite')
     def favorites(self, request, pk):
         if request.method == 'POST':
             if Favorites.objects.filter(

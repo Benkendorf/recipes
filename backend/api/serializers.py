@@ -4,10 +4,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
+from rest_framework import serializers
+
 from recipes.constants import COOKING_TIME_MIN_VALUE
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from rest_framework import serializers
 from users.models import Subscription
 
 User = get_user_model()
@@ -32,11 +33,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
     def get_is_subscribed(self, obj):
-        if isinstance(self.context['request'].user, AnonymousUser):
-            return False
 
-        return self.context['request'].user.followers.filter(
-            subscribed_to=obj).exists()
+        return (self.context["request"].user.is_authenticated
+                and self.context['request'].user.followers.filter(
+                    subscribed_to=obj).exists())
 
 
 class UserCreateSerializer(UserCreateSerializer):
@@ -74,7 +74,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers. ModelSerializer):
-    id = serializers.ReadOnlyField(source='ingredient.id')
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient.id', read_only=True)
+
     name = serializers.CharField(source='ingredient.name')
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit')
@@ -89,6 +91,8 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(),
         source='ingredient'
     )
+
+    amount = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = RecipeIngredient
@@ -108,18 +112,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
+        read_only_fields = ['__all__',]
         model = Recipe
 
     def get_is_favorited(self, obj):
-        if isinstance(self.context['request'].user, AnonymousUser):
-            return False
-        return self.context['request'].user.favorites.filter(
+        return self.context["request"].user.is_authenticated and self.context['request'].user.favorites.filter(
             recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        if isinstance(self.context['request'].user, AnonymousUser):
-            return False
-        return self.context['request'].user.shoppingcart.filter(
+        return self.context["request"].user.is_authenticated and self.context['request'].user.shoppingcart.filter(
             recipe=obj).exists()
 
 
