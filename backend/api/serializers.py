@@ -1,15 +1,13 @@
 import base64
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
-from rest_framework import serializers
-
 from recipes.constants import COOKING_TIME_MIN_VALUE
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
+from rest_framework import serializers
 from users.models import Subscription
 
 User = get_user_model()
