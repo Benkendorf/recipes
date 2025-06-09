@@ -4,7 +4,7 @@ from django.db import models
 from recipes.constants import (USER_FIRST_NAME_MAX_LENGTH,
                                USER_LAST_NAME_MAX_LENGTH)
 
-### test
+
 class UserModel(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='Адрес почты')
     first_name = models.CharField(
