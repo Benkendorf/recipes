@@ -3,18 +3,16 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (SAFE_METHODS,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
-from sqids import Sqids
-
 from recipes.constants import SHORT_LINK_MIN_LENGTH
 from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from sqids import Sqids
 from users.models import Subscription, UserModel
 
 from .serializers import (AvatarSerializer, FavoritesSerializer,
