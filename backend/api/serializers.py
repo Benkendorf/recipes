@@ -3,6 +3,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
@@ -58,6 +59,12 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('subscriber', 'subscribed_to')
         model = Subscription
+
+    def validate(self, data):
+        if data['subscriber'] == data['subscribed_to']:
+            raise serializers.ValidationError('Нельзя подписаться'
+                                              ' на самого себя!')
+        return data
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -116,12 +123,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
 
     def get_is_favorited(self, obj):
-        return self.context["request"].user.is_authenticated and self.context['request'].user.favorites.filter(
-            recipe=obj).exists()
+        return (self.context["request"].user.is_authenticated
+                and self.context['request'].user.favorites.filter(
+                    recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
-        return self.context["request"].user.is_authenticated and self.context['request'].user.shoppingcart.filter(
-            recipe=obj).exists()
+        return (self.context["request"].user.is_authenticated
+                and self.context['request'].user.shoppingcart.filter(
+                    recipe=obj).exists())
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -140,25 +149,25 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Recipe
 
-    def create(self, validated_data):
-        try:
-            tags = validated_data.pop('tags')
-        except KeyError:
+    def validate(self, data):
+        if 'tags' not in data:
             raise serializers.ValidationError({'tags': 'Обязательное поле.'})
-
-        try:
-            ingredients_data = validated_data.pop('ingredients')
-        except KeyError:
+        if 'ingredients' not in data:
             raise serializers.ValidationError({'ingredients':
                                                'Обязательное поле.'})
-
-        if len(tags) != len(set(tags)):
+        if len(data['tags']) != len(set(data['tags'])):
             raise serializers.ValidationError('Тэги должны быть уникальны.')
 
-        just_ings = [dic['ingredient'] for dic in ingredients_data]
+        just_ings = [dic['ingredient'] for dic in data['ingredients']]
         if len(just_ings) != len(set(just_ings)):
             raise serializers.ValidationError('Ингредиенты'
                                               ' должны быть уникальны.')
+
+        return data
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
 
         recipe = Recipe.objects.create(**validated_data)
 
@@ -169,16 +178,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        try:
-            tags = validated_data.pop('tags')
-        except KeyError:
-            raise serializers.ValidationError({'tags': 'Обязательное поле.'})
-
-        try:
-            ingredients_data = validated_data.pop('ingredients')
-        except KeyError:
-            raise serializers.ValidationError({'ingredients':
-                                               'Обязательное поле.'})
+        tags = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
 
         super().update(instance, validated_data)
 
@@ -236,9 +237,25 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         fields = ('owner', 'recipe')
         model = ShoppingCart
 
+    def validate(self, data):
+        if ('request' in self.context
+            and not self.context['request'].user.shoppingcart_recipes(
+                recipe=get_object_or_404(Recipe, pk=data['pk'])).exists()):
+            raise serializers.ValidationError('Нельзя добавить'
+                                              ' уже добавленный рецепт!')
+        return data
+
 
 class FavoritesSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('owner', 'recipe')
         model = Favorites
+
+    def validate(self, data):
+        if ('request' in self.context
+            and not self.context['request'].user.favorites_recipes(
+                recipe=get_object_or_404(Recipe, pk=data['pk'])).exists()):
+            raise serializers.ValidationError('Нельзя добавить'
+                                              ' уже добавленный рецепт!')
+        return data
