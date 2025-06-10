@@ -49,7 +49,7 @@ class UserModelViewSet(UserViewSet):
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get',],
+    @action(detail=False, methods=['get', ],
             permission_classes=[IsAuthenticated, ],
             pagination_class=PageNumberPagination,
             url_path='subscriptions')
@@ -179,7 +179,7 @@ class RecipeViewset(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(detail=True, methods=['get',], url_path='get-link')
+    @action(detail=True, methods=['get', ], url_path='get-link')
     def short_link(self, request, pk):
         try:
             recipe = Recipe.objects.get(pk=pk)
@@ -193,7 +193,7 @@ class RecipeViewset(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(detail=False, methods=['get',],
+    @action(detail=False, methods=['get', ],
             permission_classes=[IsAuthenticated, ],
             url_path='download_shopping_cart')
     def cart_download(self, request):

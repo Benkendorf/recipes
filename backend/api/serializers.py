@@ -117,7 +117,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        read_only_fields = ['__all__',]
+        read_only_fields = ['__all__', ]
         model = Recipe
 
     def get_is_favorited(self, obj):
